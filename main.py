@@ -1,22 +1,33 @@
 # main.py
 
+import os
 import requests
 import json
 import datetime
 from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
-from whitenoise import WhiteNoise # Import Whitenoise
+from whitenoise import WhiteNoise
 
-# --- Flask App Initialization (Final, Correct Version) ---
-# We initialize the standard Flask app. The 'templates' folder is found automatically.
-app = Flask(__name__)
+# --- Flask App Initialization (Final, Bulletproof Version) ---
+
+# Get the absolute path of the directory where this file lives.
+# Inside the Docker container, this will be '/app'.
+ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# Define the absolute paths to the templates and static folders.
+# This leaves zero ambiguity for Flask or Whitenoise.
+TEMPLATE_FOLDER = os.path.join(ROOT_DIR, 'templates')
+STATIC_FOLDER = os.path.join(ROOT_DIR, 'static')
+
+# Initialize Flask with these absolute paths.
+app = Flask(__name__, template_folder=TEMPLATE_FOLDER, static_folder=STATIC_FOLDER)
 CORS(app)
 
-# --- Whitenoise Configuration (Final, Correct Version) ---
-# We now explicitly tell Whitenoise: "The URL prefix '/static/' corresponds
-# to the physical directory named 'static/' in my project."
-# This is the most robust way to configure it.
-app.wsgi_app = WhiteNoise(app.wsgi_app, root='static/', prefix='static/')
+# --- Whitenoise Configuration (Final, Bulletproof Version) ---
+# Initialize Whitenoise on the app. It is smart enough to use the
+# 'static_folder' and 'static_url_path' from the Flask app instance we just configured.
+# This is the simplest and most robust integration.
+app.wsgi_app = WhiteNoise(app.wsgi_app)
 
 
 # --- Configuration Constants (No Change) ---
