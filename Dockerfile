@@ -14,6 +14,7 @@ COPY . .
 
 EXPOSE 8080
 
-# The command to run the application.
-# It now references 'main:app' directly because main.py is in the root.
-CMD ["gunicorn", "--bind", "0.0.0.0:8080", "main:app"]
+# === THE FINAL, CRITICAL FIX IS ON THIS LINE ===
+# We are telling Gunicorn to wait up to 310 seconds for a request to complete,
+# which is longer than the 300-second timeout in our requests call.
+CMD ["gunicorn", "--bind", "0.0.0.0:8080", "--timeout", "360", "main:app"]
