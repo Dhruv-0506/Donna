@@ -24,7 +24,7 @@ document.getElementById('research-button').addEventListener('click', function() 
     loadingContainer.classList.remove('hidden');
     outputContainer.classList.add('hidden');
 
-    // Define the backend URL as a root-relative path
+    // Define the backend URL as a root-relative path. This is correct.
     const backendUrl = '/research';
 
     // Send the data to the backend API
@@ -46,7 +46,6 @@ document.getElementById('research-button').addEventListener('click', function() 
         loadingContainer.classList.add('hidden');
         
         if (data.dossier) {
-            // A simple way to render Markdown-like line breaks and basic formatting
             let formattedDossier = data.dossier.replace(/\n/g, '<br>');
             outputContent.innerHTML = formattedDossier;
         } else {
@@ -60,7 +59,6 @@ document.getElementById('research-button').addEventListener('click', function() 
         console.error('Error during fetch operation:', error);
         loadingContainer.classList.add('hidden');
         
-        // Display a user-friendly error message
         outputContent.innerHTML = `
             <h2>An Error Occurred</h2>
             <p>Could not retrieve the research dossier. Please check the browser console for details and ensure the backend is running correctly.</p>
