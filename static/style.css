@@ -10,11 +10,11 @@ body {
     align-items: center;
     min-height: 100vh;
     margin: 0;
-    overflow: hidden; /* Prevents scrollbars from the background elements */
+    overflow: hidden;
 
-    /* === UPDATED: New darker, richer background inspired by your image === */
-    background: #141E30; /* Fallback color */
-    background: linear-gradient(to top right, #0c0a1a, #1c162c); /* Deep space purple/blue */
+    /* Darker, richer background */
+    background: #141E30;
+    background: linear-gradient(to top right, #0c0a1a, #1c162c);
 }
 
 .container {
@@ -23,12 +23,10 @@ body {
     width: 100%;
     max-width: 700px;
 
-    /* === UPDATED: Frosted glass panel now stands out more === */
-    /* Increased the background opacity from 0.1 to 0.15 to make it "more white" */
+    /* Frosted glass panel that stands out more */
     background: rgba(255, 255, 255, 0.15);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    /* Increased the border opacity from 0.2 to 0.3 to define the edge */
     border: 1px solid rgba(255, 255, 255, 0.3);
     box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
 }
@@ -203,3 +201,37 @@ button:hover {
 #output-content th {
     background-color: rgba(255, 255, 255, 0.1);
 }
+
+
+/* ==================================================================== */
+/* === NEW: MODERN SCROLLBAR STYLING === */
+/* This targets the scrollbar in textareas and the output content box */
+
+/* The main scrollbar element */
+textarea::-webkit-scrollbar,
+#output-content::-webkit-scrollbar {
+  width: 10px; /* Thinner scrollbar */
+}
+
+/* The track (the background of the scrollbar) */
+textarea::-webkit-scrollbar-track,
+#output-content::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2); /* A very subtle dark track */
+  border-radius: 10px;
+}
+
+/* The thumb (the draggable part) */
+textarea::-webkit-scrollbar-thumb,
+#output-content::-webkit-scrollbar-thumb {
+  background-color: rgba(142, 68, 173, 0.5); /* Semi-transparent purple from the theme */
+  border-radius: 10px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+/* Style the thumb on hover for better user feedback */
+textarea::-webkit-scrollbar-thumb:hover,
+#output-content::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(142, 68, 173, 0.8); /* Make the thumb more opaque on hover */
+}
+/* ==================================================================== */
