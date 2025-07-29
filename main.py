@@ -5,12 +5,18 @@ import json
 import datetime
 from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
+from whitenoise import WhiteNoise # Import Whitenoise
 
 # --- Flask App Initialization ---
-# Because main.py is in the root with the templates/ and static/ folders,
-# Flask finds them automatically. This is the simplest configuration.
-app = Flask(__name__)
+# Initialize the Flask app. We tell it explicitly to NOT handle static files,
+# because Whitenoise will be doing it.
+app = Flask(__name__, static_folder=None)
 CORS(app)
+
+# --- Whitenoise Configuration ---
+# Wrap the app with Whitenoise. Tell it that the static files are in the 'static' folder.
+app.wsgi_app = WhiteNoise(app.wsgi_app, root='static/')
+
 
 # --- Configuration Constants (No Change) ---
 API_KEY = "sIuhGRaC8JlSkdLkNzB9gZZAfVNsVXUN"
