@@ -1,23 +1,33 @@
+/* static/style.css */
+
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Lato:wght@400;700&display=swap');
 
 body {
     font-family: 'Lato', sans-serif;
-    background-color: #f4f4f9;
-    color: #333;
+    color: #f0e6ff; /* Lighter text color for better contrast on dark background */
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
     margin: 0;
+
+    /* NEW: Violet and dark purple gradient background */
+    background: #4c2a85; /* A fallback color */
+    background: linear-gradient(to bottom right, #4c2a85, #2c1e3e);
 }
 
 .container {
-    background-color: #fff;
     padding: 40px;
-    border-radius: 8px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    border-radius: 12px; /* Slightly more rounded corners */
     width: 100%;
-    max-width: 600px;
+    max-width: 700px; /* A bit wider to look better */
+
+    /* NEW: Frosted glass effect */
+    background: rgba(255, 255, 255, 0.1); /* Semi-transparent white background */
+    backdrop-filter: blur(12px); /* The blur effect */
+    -webkit-backdrop-filter: blur(12px); /* For Safari compatibility */
+    border: 1px solid rgba(255, 255, 255, 0.2); /* Subtle border to catch the light */
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37); /* Deeper shadow for depth */
 }
 
 .header {
@@ -27,14 +37,14 @@ body {
 
 .header h1 {
     font-family: 'Playfair Display', serif;
-    font-size: 3em;
+    font-size: 3.5em; /* A bit larger */
     margin: 0;
-    color: #2c3e50;
+    color: #ffffff; /* Pure white for the main title */
 }
 
 .header p {
     font-size: 1.1em;
-    color: #7f8c8d;
+    color: #d1c4e9; /* A lighter purple for the subtitle */
 }
 
 .form-container .input-group {
@@ -46,18 +56,28 @@ body {
 .form-container textarea {
     width: 100%;
     padding: 12px;
-    border: 1px solid #ddd;
+    border: 1px solid rgba(255, 255, 255, 0.3); /* Lighter border for inputs */
     border-radius: 4px;
     font-size: 1em;
     box-sizing: border-box;
-    transition: border-color 0.3s;
+    transition: all 0.3s;
+    background: rgba(0, 0, 0, 0.2); /* Dark, semi-transparent background for inputs */
+    color: #ffffff; /* White text for inputs */
 }
+
+/* Change placeholder text color */
+.form-container input::placeholder,
+.form-container textarea::placeholder {
+    color: #b3a8c8;
+}
+
 
 .form-container input[type="text"]:focus,
 .form-container input[type="url"]:focus,
 .form-container textarea:focus {
     outline: none;
-    border-color: #8e44ad;
+    border-color: #ffffff; /* White border on focus */
+    background: rgba(0, 0, 0, 0.4);
 }
 
 .form-container textarea {
@@ -68,7 +88,7 @@ body {
 .separator {
     border: 0;
     height: 1px;
-    background-color: #ecf0f1;
+    background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.3), transparent);
     margin: 30px 0;
 }
 
@@ -83,13 +103,14 @@ button {
     display: block;
     width: 100%;
     transition: background-color 0.3s;
+    font-weight: bold;
 }
 
 button:hover {
     background-color: #9b59b6;
 }
 
-/* Loading Icon */
+/* Loading Icon - No changes needed */
 .hidden {
     display: none;
 }
@@ -111,7 +132,7 @@ button:hover {
     height: 100%;
     border-radius: 50%;
     border: 4px solid transparent;
-    border-top-color: #8e44ad;
+    border-top-color: #ffffff; /* White spinner to match the theme */
     animation: spin 1.5s linear infinite;
 }
 
@@ -122,7 +143,7 @@ button:hover {
     transform: translate(-50%, -50%);
     font-family: 'Playfair Display', serif;
     font-size: 2em;
-    color: #8e44ad;
+    color: #ffffff; /* White D to match */
 }
 
 @keyframes spin {
@@ -137,16 +158,53 @@ button:hover {
 
 #output-container h2 {
     font-family: 'Playfair Display', serif;
-    color: #2c3e50;
+    color: #ffffff;
     text-align: center;
     margin-bottom: 20px;
 }
 
+/* NEW: Scrollable box for the output content */
 #output-content {
-    background-color: #f9f9f9;
-    padding: 20px;
-    border-radius: 4px;
-    border: 1px solid #eee;
-    white-space: pre-wrap; /* To respect formatting from the LLM */
-    line-height: 1.6;
+    background-color: rgba(0, 0, 0, 0.3);
+    padding: 25px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    white-space: pre-wrap;
+    line-height: 1.7;
+    font-family: 'Menlo', 'Courier New', monospace; /* Monospaced font looks good for raw output */
+    
+    /* These two lines make the box scrollable */
+    max-height: 50vh; /* It will be at most 50% of the viewport height */
+    overflow-y: auto; /* A scrollbar will appear only when needed */
+}
+
+/* Styling for the markdown output */
+#output-content h1,
+#output-content h2,
+#output-content h3 {
+    font-family: 'Playfair Display', serif;
+    margin-top: 1.5em;
+    margin-bottom: 0.5em;
+    padding-bottom: 0.3em;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+#output-content strong {
+    color: #e6daff;
+}
+
+#output-content table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1em 0;
+}
+
+#output-content th, #output-content td {
+    padding: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    text-align: left;
+}
+
+#output-content th {
+    background-color: rgba(255, 255, 255, 0.1);
 }
