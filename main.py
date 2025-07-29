@@ -24,8 +24,8 @@ AGENT_IDS = [
     "agent-1716164040", "agent-1722260873", "agent-1746427905",
     "agent-1747218812", "agent-1750747741"
 ]
-ENDPOINT_ID = "predefined-openai-gpt4o"
-REASONING_MODE = "deepturbo"
+ENDPOINT_ID = "predefined-openai-gpt4.1"
+REASONING_MODE = "sota"
 TEMPERATURE = 0.7
 MAX_TOKENS = 10000
 
