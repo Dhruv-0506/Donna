@@ -2,18 +2,23 @@
 
 import requests
 import json
-from flask import Flask, request, jsonify, render_template
-from flask_cors import CORS
 import datetime
+from flask import Flask, request, jsonify, send_from_directory
+from flask_cors import CORS
 
-# --- Configuration Constants (No changes) ---
+# --- Flask App Initialization ---
+# No special folder configurations are needed with this explicit routing method.
+app = Flask(__name__)
+CORS(app)
+
+# --- Configuration Constants ---
 API_KEY = "sIuhGRaC8JlSkdLkNzB9gZZAfVNsVXUN"
 EXTERNAL_USER_ID = "665e32c0516a19e2faddef17"
 BASE_URL = "https://api.on-demand.io/chat/v1"
-RESPONSE_MODE = "sync" 
+RESPONSE_MODE = "sync"
 AGENT_IDS = [
-    "agent-1712327325", "agent-1713924030", "agent-1713962163", 
-    "agent-1716164040", "agent-1722260873", "agent-1746427905", 
+    "agent-1712327325", "agent-1713924030", "agent-1713962163",
+    "agent-1716164040", "agent-1722260873", "agent-1746427905",
     "agent-1747218812", "agent-1750747741"
 ]
 ENDPOINT_ID = "predefined-openai-gpt4.1-nano"
@@ -21,6 +26,7 @@ REASONING_MODE = "deepturbo"
 TEMPERATURE = 0.7
 MAX_TOKENS = 10000
 
+# --- Full "Donna" Dossier Prompt ---
 DONNA_PROMPT_TEMPLATE = """
 🧠 YOUR ROLE
 You are The Donna — an elite AI sales consigliere. Your mission is to generate a comprehensive intelligence dossier based on the target company, the solutions being positioned, and the rep's pre-defined sales territory. Your output must be deeply territory-specific, solution-aligned, and strategically actionable — designed to support deal execution, CRM updates, and sales planning at an elite level.
@@ -36,12 +42,14 @@ You will now receive only the opportunity-specific inputs:
 Company URL: {target_company_url}
 Solutions to Position: {solutions_to_position}
 Opportunity Name: {opportunity_name}
+
 📌 GUIDING PRINCIPLES
 The Territory must always reflect the region pre-defined by the rep (e.g., Canada, UAE, France, APAC, etc.)
 All regulatory, financial, organizational, and personal insights should be localized to this territory
 All content must align to the positioned solutions — surfacing relevance, urgency, compliance gaps, or tech/strategic fit
 Every paragraph must be sales-relevant, detailed (150–200 words minimum), and fact-driven
 Cite sources wherever possible (e.g., LinkedIn, Crunchbase, SEDAR, regional news, financial filings)
+
 📋 INTELLIGENCE DOSSIER STRUCTURE
 1. EXECUTIVE SUMMARY
 Company: [Target Company Name]
@@ -50,6 +58,7 @@ Opportunity: {opportunity_name}
 Sales Rep: {rep_name}
 Date Created: {today_date}
 Last Updated: {today_date}
+
 2. COMPANY PROFILE
 2.1 BASIC COMPANY INFORMATION
 Full Legal Name
@@ -145,7 +154,7 @@ New partnerships, alliances, or acquisitions related to your solution areas
 Corporate restructuring or strategic pivots affecting technology needs
 2. OPERATIONAL DEVELOPMENTS
 IT/security projects, technology migrations, and infrastructure upgrades
-Hiring trends in technology, security,compliance, or related departments
+Hiring trends in technology, security, compliance, or related departments
 Audits, certifications, or compliance initiatives requiring technology investment
 3. COMPETITIVE & MARKET POSITIONING
 Industry awards, analyst recognition (Gartner, Forrester), and thought leadership
@@ -280,6 +289,7 @@ Last Updated: Most recent information refresh
 Update Frequency: Recommended refresh schedule based on deal stage
 Trigger Events: Automatic review triggers (news, personnel changes, financial events)
 Version History: Change log and previous version references
+
 🧠 OUTPUT REQUIREMENTS
 Quality Standards
 Minimum 150–200 words per paragraph
@@ -301,20 +311,60 @@ Avoid generic statements - all content must be company and territory-specific
 Provide tactical insights that enable immediate sales action
 """
 
-# Tell Flask where to find the HTML file ('../' means one directory up)
-# and where to find the CSS/JS files (also one directory up).
-app = Flask(__name__, template_folder='../', static_folder='../')
-CORS(app)
+# --- API Helper Functions ---
+def create_chat_session():
+    url = f"{BASE_URL}/sessions"
+    body = {"agentIds": AGENT_IDS, "externalUserId": EXTERNAL_USER_ID}
+    headers = {"apikey": API_KEY, "Content-Type": "application/json"}
+    try:
+        res = requests.post(url, headers=headers, json=body, timeout=10)
+        res.raise_for_status()
+        data = res.json()
+        session_id = data.get("data", {}).get("id")
+        if session_id:
+            print(f"Chat session created: {session_id}")
+            return session_id
+        return None
+    except requests.exceptions.RequestException as e:
+        print(f"Error creating chat session: {e}")
+        return None
 
-# ====================================================================
-# === CORRECTED ROUTE FOR THE UI ===
-# This is now the ONLY function that handles the root URL '/'
+def submit_dossier_request(session_id, prompt):
+    url = f"{BASE_URL}/sessions/{session_id}/query"
+    body = {
+        "endpointId": ENDPOINT_ID,
+        "query": prompt,
+        "agentIds": AGENT_IDS,
+        "responseMode": RESPONSE_MODE,
+        "reasoningMode": REASONING_MODE,
+        "modelConfigs": {"temperature": TEMPERATURE, "maxTokens": MAX_TOKENS},
+    }
+    headers = {"apikey": API_KEY, "Content-Type": "application/json"}
+    try:
+        res = requests.post(url, headers=headers, json=body, timeout=300)
+        res.raise_for_status()
+        response_data = res.json()
+        return response_data.get("data", {}).get("answer")
+    except requests.exceptions.RequestException as e:
+        print(f"Error submitting dossier request: {e}")
+        return "An error occurred while communicating with the AI. The request may have timed out or failed."
+
+
+# --- Explicit Routes for Serving Files and API ---
+
+# Route to serve the main index.html file
 @app.route('/')
-def serve_frontend():
-    """Serves the main index.html file to show the UI."""
-    return render_template('index.html')
-# ====================================================================
+def serve_index():
+    # Looks for index.html in the directory one level above this file's location
+    return send_from_directory('../', 'index.html')
 
+# Route to serve other static files like CSS and JavaScript
+@app.route('/<path:filename>')
+def serve_static_files(filename):
+    # Catches requests for /style.css, /script.js, etc.
+    return send_from_directory('../', filename)
+
+# Route for the main research API call
 @app.route('/research', methods=['POST'])
 def generate_dossier():
     data = request.get_json()
@@ -322,7 +372,7 @@ def generate_dossier():
         return jsonify({"error": "Invalid JSON input"}), 400
 
     today_date = datetime.date.today().strftime("%B %d, %Y")
-    
+
     try:
         final_prompt = DONNA_PROMPT_TEMPLATE.format(
             rep_name=data.get('name', 'N/A'),
@@ -346,45 +396,10 @@ def generate_dossier():
     dossier_content = submit_dossier_request(session_id, final_prompt)
     if not dossier_content:
         return jsonify({"dossier": "Error: Received no content from the AI service."}), 500
-    
+
     return jsonify({"dossier": dossier_content})
 
-def create_chat_session():
-    url = f"{BASE_URL}/sessions"
-    body = { "agentIds": AGENT_IDS, "externalUserId": EXTERNAL_USER_ID }
-    headers = {"apikey": API_KEY, "Content-Type": "application/json"}
-    try:
-        res = requests.post(url, headers=headers, json=body, timeout=10)
-        res.raise_for_status()
-        data = res.json()
-        session_id = data.get("data", {}).get("id")
-        if session_id:
-            print(f"Chat session created: {session_id}")
-            return session_id
-        return None
-    except requests.exceptions.RequestException as e:
-        print(f"Error creating chat session: {e}")
-        return None
 
-def submit_dossier_request(session_id, prompt):
-    url = f"{BASE_URL}/sessions/{session_id}/query"
-    body = {
-        "endpointId": ENDPOINT_ID,
-        "query": prompt,
-        "agentIds": AGENT_IDS,
-        "responseMode": RESPONSE_MODE,
-        "reasoningMode": REASONING_MODE,
-        "modelConfigs": { "temperature": TEMPERATURE, "maxTokens": MAX_TOKENS },
-    }
-    headers = {"apikey": API_KEY, "Content-Type": "application/json"}
-    try:
-        res = requests.post(url, headers=headers, json=body, timeout=300)
-        res.raise_for_status()
-        response_data = res.json()
-        return response_data.get("data", {}).get("answer")
-    except requests.exceptions.RequestException as e:
-        print(f"Error submitting dossier request: {e}")
-        return "An error occurred while communicating with the AI. The request may have timed out or failed."
-
+# --- Main entry point for local execution ---
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080, debug=True)
