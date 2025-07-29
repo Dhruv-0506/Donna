@@ -4,7 +4,7 @@ import os
 import requests
 import json
 import datetime
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template, send_from_directory
 from flask_cors import CORS
 from whitenoise import WhiteNoise
 
@@ -15,18 +15,17 @@ from whitenoise import WhiteNoise
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # Define the absolute paths to the templates and static folders.
-# This leaves zero ambiguity for Flask or Whitenoise.
-TEMPLATE_FOLDER = os.path.join(ROOT_DIR, 'templates')
-STATIC_FOLDER = os.path.join(ROOT_DIR, 'static')
+# This leaves zero ambiguity for the server.
+TEMPLATE_DIR = os.path.join(ROOT_DIR, 'templates')
+STATIC_DIR = os.path.join(ROOT_DIR, 'static')
 
 # Initialize Flask with these absolute paths.
-app = Flask(__name__, template_folder=TEMPLATE_FOLDER, static_folder=STATIC_FOLDER)
+app = Flask(__name__, template_folder=TEMPLATE_DIR, static_folder=STATIC_DIR)
 CORS(app)
 
-# --- Whitenoise Configuration (Final, Bulletproof Version) ---
+# --- Whitenoise Configuration ---
 # Initialize Whitenoise on the app. It is smart enough to use the
-# 'static_folder' and 'static_url_path' from the Flask app instance we just configured.
-# This is the simplest and most robust integration.
+# static_folder we defined above. This is the most robust integration.
 app.wsgi_app = WhiteNoise(app.wsgi_app)
 
 
