@@ -3,15 +3,16 @@
 import requests
 import json
 import datetime
-from flask import Flask, request, jsonify, send_from_directory
+from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 
 # --- Flask App Initialization ---
-# No special folder configurations are needed with this explicit routing method.
-app = Flask(__name__)
+# This configuration tells Flask to look for the 'templates' and 'static'
+# folders in the directory one level above this file's location.
+app = Flask(__name__, template_folder='../templates', static_folder='../static')
 CORS(app)
 
-# --- Configuration Constants ---
+# --- Configuration Constants (No Change) ---
 API_KEY = "sIuhGRaC8JlSkdLkNzB9gZZAfVNsVXUN"
 EXTERNAL_USER_ID = "665e32c0516a19e2faddef17"
 BASE_URL = "https://api.on-demand.io/chat/v1"
@@ -26,7 +27,7 @@ REASONING_MODE = "deepturbo"
 TEMPERATURE = 0.7
 MAX_TOKENS = 10000
 
-# --- Full "Donna" Dossier Prompt ---
+# --- Full "Donna" Dossier Prompt (No Change) ---
 DONNA_PROMPT_TEMPLATE = """
 🧠 YOUR ROLE
 You are The Donna — an elite AI sales consigliere. Your mission is to generate a comprehensive intelligence dossier based on the target company, the solutions being positioned, and the rep's pre-defined sales territory. Your output must be deeply territory-specific, solution-aligned, and strategically actionable — designed to support deal execution, CRM updates, and sales planning at an elite level.
@@ -311,7 +312,7 @@ Avoid generic statements - all content must be company and territory-specific
 Provide tactical insights that enable immediate sales action
 """
 
-# --- API Helper Functions ---
+# --- API Helper Functions (No Change) ---
 def create_chat_session():
     url = f"{BASE_URL}/sessions"
     body = {"agentIds": AGENT_IDS, "externalUserId": EXTERNAL_USER_ID}
@@ -349,22 +350,15 @@ def submit_dossier_request(session_id, prompt):
         print(f"Error submitting dossier request: {e}")
         return "An error occurred while communicating with the AI. The request may have timed out or failed."
 
+# --- Routes ---
 
-# --- Explicit Routes for Serving Files and API ---
-
-# Route to serve the main index.html file
+# This is the main route that serves the User Interface (UI)
 @app.route('/')
-def serve_index():
-    # Looks for index.html in the directory one level above this file's location
-    return send_from_directory('../', 'index.html')
+def serve_ui():
+    # Renders the index.html file from the 'templates' folder
+    return render_template('index.html')
 
-# Route to serve other static files like CSS and JavaScript
-@app.route('/<path:filename>')
-def serve_static_files(filename):
-    # Catches requests for /style.css, /script.js, etc.
-    return send_from_directory('../', filename)
-
-# Route for the main research API call
+# This is the API endpoint that the UI calls
 @app.route('/research', methods=['POST'])
 def generate_dossier():
     data = request.get_json()
@@ -399,7 +393,6 @@ def generate_dossier():
 
     return jsonify({"dossier": dossier_content})
 
-
-# --- Main entry point for local execution ---
+# --- Main entry point ---
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080, debug=True)
