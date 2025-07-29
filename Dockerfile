@@ -15,4 +15,4 @@ COPY . .
 EXPOSE 8080
 
 # This command is now correct because main.py is in the root of /app
-CMD ["gunicorn", "--bind", "0.0.0.0:8080", "main:app"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8080", "--timeout", "360", "main:app"]
