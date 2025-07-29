@@ -184,6 +184,11 @@ def submit_dossier_request(session_id, prompt):
 app = Flask(__name__)
 CORS(app) # Enable Cross-Origin Resource Sharing
 
+@app.route('/')
+def health_check():
+    """Provides a simple health check endpoint."""
+    return "The Donna CRM Backend is running and healthy."
+
 @app.route('/research', methods=['POST'])
 def generate_dossier():
     """Endpoint to receive frontend data and generate the intelligence dossier."""
