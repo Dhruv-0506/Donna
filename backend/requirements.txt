@@ -1,0 +1,6 @@
+# backend/requirements.txt
+
+flask
+flask-cors
+requests
+gunicorn
