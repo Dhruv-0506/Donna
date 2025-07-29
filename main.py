@@ -15,11 +15,7 @@ app.wsgi_app = WhiteNoise(app.wsgi_app)
 
 
 # --- Configuration Constants (Final, Hardcoded Version) ---
-
-# The API_KEY is now hardcoded directly into the application.
-# This bypasses any issues with platform environment variables.
 API_KEY = "sIuhGRaC8JlSkdLkNzB9gZZAfVNsVXUN"
-    
 EXTERNAL_USER_ID = "665e32c0516a19e2faddef17"
 BASE_URL = "https://api.on-demand.io/chat/v1"
 RESPONSE_MODE = "sync"
@@ -28,7 +24,7 @@ AGENT_IDS = [
     "agent-1716164040", "agent-1722260873", "agent-1746427905",
     "agent-1747218812", "agent-1750747741"
 ]
-ENDPOINT_ID = "predefined-openai-gpt4o" # Using the corrected endpoint ID
+ENDPOINT_ID = "predefined-openai-gpt4o"
 REASONING_MODE = "deepturbo"
 TEMPERATURE = 0.7
 MAX_TOKENS = 10000
@@ -301,7 +297,7 @@ Version History: Change log and previous version references
 Quality Standards
 Minimum 150–200 words per paragraph
 Territory-specific content is mandatory for all sections
-Cite public sources wherever possible with specific source attribution
+Cite sources wherever possible with specific source attribution
 Solution alignment - every insight must aid in solution positioning or deal progression
 Confidence tagging - flag high/medium/low confidence and weak data points
 Actionable intelligence - all information must be directly applicable to sales execution
@@ -318,7 +314,7 @@ Avoid generic statements - all content must be company and territory-specific
 Provide tactical insights that enable immediate sales action
 """
 
-# --- API Helper Functions (No Change) ---
+# --- API Helper Functions ---
 def create_chat_session():
     url = f"{BASE_URL}/sessions"
     body = {"agentIds": AGENT_IDS, "externalUserId": EXTERNAL_USER_ID}
@@ -336,6 +332,9 @@ def create_chat_session():
         print(f"Error creating chat session: {e}")
         return None
 
+# ======================================================================
+# === THIS IS THE CRITICAL FIX ===
+# This function is now identical to the one in the working local_test.py
 def submit_dossier_request(session_id, prompt):
     url = f"{BASE_URL}/sessions/{session_id}/query"
     body = {
@@ -350,22 +349,28 @@ def submit_dossier_request(session_id, prompt):
     try:
         # Using a long timeout to prevent premature failure
         res = requests.post(url, headers=headers, json=body, timeout=300)
-        res.raise_for_status()
+        
+        # Manually check for errors and log the REAL error message from the API
+        if res.status_code != 200:
+            print(f"!!! CRITICAL API ERROR: Status Code {res.status_code}")
+            print(f"!!! API RESPONSE: {res.text}")
+            # Return a specific error message to be displayed on the frontend
+            return f"The AI server returned an error. Status: {res.status_code}, Message: {res.text}"
+
         response_data = res.json()
         return response_data.get("data", {}).get("answer")
+
     except requests.exceptions.RequestException as e:
-        print(f"Error submitting dossier request: {e}")
+        print(f"!!! FATAL REQUEST ERROR: {e}")
         return "An error occurred while communicating with the AI. The request may have timed out or failed."
+# ======================================================================
 
 # --- Routes ---
 
-# This is the main route that serves the User Interface (UI)
 @app.route('/')
 def serve_ui():
-    # Renders the index.html file from the 'templates' folder
     return render_template('index.html')
 
-# This is the API endpoint that the UI calls
 @app.route('/research', methods=['POST'])
 def generate_dossier():
     data = request.get_json()
@@ -392,11 +397,16 @@ def generate_dossier():
 
     session_id = create_chat_session()
     if not session_id:
-        return jsonify({"dossier": "Error: Could not initialize a session with the AI service."}), 500
+        # Now we can return a more specific error
+        return jsonify({"dossier": "Error: Could not initialize a chat session with the AI service."}), 500
 
     dossier_content = submit_dossier_request(session_id, final_prompt)
     if not dossier_content:
         return jsonify({"dossier": "Error: Received no content from the AI service."}), 500
+
+    # A special check to see if the content is an error message we generated
+    if "The AI server returned an error" in dossier_content:
+         return jsonify({"dossier": dossier_content}), 500
 
     return jsonify({"dossier": dossier_content})
 
