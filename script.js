@@ -29,7 +29,7 @@ document.getElementById('research-button').addEventListener('click', function() 
     // --- 3. Send data to your backend API ---
     // Make sure your backend is running. For local testing, this will be http://localhost:8080
     // When deployed, this will be your serverless application's URL.
-    const backendUrl = 'http://localhost:8080/research'; 
+    const backendUrl = 'https://serverless.on-demand.io/apps/donnaprototype/research'; 
 
     fetch(backendUrl, {
         method: 'POST',
