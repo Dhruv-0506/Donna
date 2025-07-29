@@ -8,37 +8,19 @@ from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 from whitenoise import WhiteNoise
 
-# --- Flask App Initialization (Final, Bulletproof Version) ---
-
-# Get the absolute path of the directory where this file lives.
-# Inside the Docker container, this will be '/app'.
-ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
-
-# Define the absolute paths to the templates and static folders.
-# This leaves zero ambiguity for the server.
-TEMPLATE_DIR = os.path.join(ROOT_DIR, 'templates')
-STATIC_DIR = os.path.join(ROOT_DIR, 'static')
-
-# Initialize Flask with these absolute paths.
-app = Flask(__name__, template_folder=TEMPLATE_DIR, static_folder=STATIC_DIR)
+# --- Flask App Initialization (Final, Correct Version) ---
+app = Flask(__name__, template_folder='templates', static_folder='static')
 CORS(app)
-
-# --- Whitenoise Configuration ---
-# Initialize Whitenoise on the app. It is smart enough to use the
-# 'static_folder' from the Flask app instance we just configured.
-# This is the most robust integration.
 app.wsgi_app = WhiteNoise(app.wsgi_app)
 
 
-# --- Configuration Constants ---
-# This line now safely reads the key from the environment variables.
-API_KEY = os.getenv("API_KEY")
+# --- Configuration Constants (Final, Hardcoded Version) ---
 
-# Add a check to make sure the app doesn't start if the key is missing
-if not API_KEY:
-    raise ValueError("No API_KEY set for the application")
+# The API_KEY is now hardcoded directly into the application.
+# This bypasses any issues with platform environment variables.
+API_KEY = "sIuhGRaC8JlSkdLkNzB9gZZAfVNsVXUN"
     
-EXTERNAL_USER_ID = "665e32c0516a19e2faddef17" # This can also be an env variable if needed
+EXTERNAL_USER_ID = "665e32c0516a19e2faddef17"
 BASE_URL = "https://api.on-demand.io/chat/v1"
 RESPONSE_MODE = "sync"
 AGENT_IDS = [
@@ -46,7 +28,7 @@ AGENT_IDS = [
     "agent-1716164040", "agent-1722260873", "agent-1746427905",
     "agent-1747218812", "agent-1750747741"
 ]
-ENDPOINT_ID = "predefined-openai-gpt4.1-nano"
+ENDPOINT_ID = "predefined-openai-gpt4o" # Using the corrected endpoint ID
 REASONING_MODE = "deepturbo"
 TEMPERATURE = 0.7
 MAX_TOKENS = 10000
@@ -366,6 +348,7 @@ def submit_dossier_request(session_id, prompt):
     }
     headers = {"apikey": API_KEY, "Content-Type": "application/json"}
     try:
+        # Using a long timeout to prevent premature failure
         res = requests.post(url, headers=headers, json=body, timeout=300)
         res.raise_for_status()
         response_data = res.json()
