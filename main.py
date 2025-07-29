@@ -4,7 +4,7 @@ import os
 import requests
 import json
 import datetime
-from flask import Flask, request, jsonify, render_template, send_from_directory
+from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 from whitenoise import WhiteNoise
 
@@ -25,13 +25,20 @@ CORS(app)
 
 # --- Whitenoise Configuration ---
 # Initialize Whitenoise on the app. It is smart enough to use the
-# static_folder we defined above. This is the most robust integration.
+# 'static_folder' from the Flask app instance we just configured.
+# This is the most robust integration.
 app.wsgi_app = WhiteNoise(app.wsgi_app)
 
 
-# --- Configuration Constants (No Change) ---
-API_KEY = "sIuhGRaC8JlSkdLkNzB9gZZAfVNsVXUN"
-EXTERNAL_USER_ID = "665e32c0516a19e2faddef17"
+# --- Configuration Constants ---
+# This line now safely reads the key from the environment variables.
+API_KEY = os.getenv("API_KEY")
+
+# Add a check to make sure the app doesn't start if the key is missing
+if not API_KEY:
+    raise ValueError("No API_KEY set for the application")
+    
+EXTERNAL_USER_ID = "665e32c0516a19e2faddef17" # This can also be an env variable if needed
 BASE_URL = "https://api.on-demand.io/chat/v1"
 RESPONSE_MODE = "sync"
 AGENT_IDS = [
