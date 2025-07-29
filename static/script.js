@@ -24,7 +24,6 @@ document.getElementById('research-button').addEventListener('click', function() 
     loadingContainer.classList.remove('hidden');
     outputContainer.classList.add('hidden');
 
-    // Define the backend URL as a root-relative path. This is correct.
     const backendUrl = '/research';
 
     // Send the data to the backend API
@@ -46,8 +45,10 @@ document.getElementById('research-button').addEventListener('click', function() 
         loadingContainer.classList.add('hidden');
         
         if (data.dossier) {
-            let formattedDossier = data.dossier.replace(/\n/g, '<br>');
-            outputContent.innerHTML = formattedDossier;
+            // === THIS IS THE CRITICAL FIX ===
+            // Use the 'marked' library to convert the Markdown text to HTML
+            const formattedHtml = marked.parse(data.dossier);
+            outputContent.innerHTML = formattedHtml;
         } else {
              outputContent.innerHTML = "<h2>Error</h2><p>Received an empty response from the server.</p>";
         }
