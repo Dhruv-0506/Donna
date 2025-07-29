@@ -7,15 +7,15 @@ from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 from whitenoise import WhiteNoise # Import Whitenoise
 
-# --- Flask App Initialization ---
-# Initialize the Flask app. We tell it explicitly to NOT handle static files,
-# because Whitenoise will be doing it.
-app = Flask(__name__, static_folder=None)
+# --- Flask App Initialization (THE CRITICAL FIX) ---
+# This explicitly tells Flask where the static and template folders are.
+# This leaves zero ambiguity for the server.
+app = Flask(__name__, static_folder='static', template_folder='templates')
 CORS(app)
 
 # --- Whitenoise Configuration ---
-# Wrap the app with Whitenoise. Tell it that the static files are in the 'static' folder.
-app.wsgi_app = WhiteNoise(app.wsgi_app, root='static/')
+# Wrap the app with Whitenoise. It will automatically use the 'static_folder' we defined above.
+app.wsgi_app = WhiteNoise(app.wsgi_app)
 
 
 # --- Configuration Constants (No Change) ---
