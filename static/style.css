@@ -10,7 +10,11 @@ body {
     align-items: center;
     min-height: 100vh;
     margin: 0;
-    overflow: hidden;
+
+    /* UPDATED: Removed overflow:hidden to allow natural page scrolling if needed */
+    /* Added padding for smaller screens */
+    padding: 20px;
+    box-sizing: border-box; /* Ensures padding doesn't create overflow */
 
     /* Darker, richer background */
     background: #141E30;
@@ -20,7 +24,7 @@ body {
 .container {
     padding: 40px;
     border-radius: 12px;
-    width: 100%;
+    width: 100%; /* UPDATED: Width is now 100% of its parent */
     max-width: 700px;
 
     /* Frosted glass panel that stands out more */
@@ -168,7 +172,7 @@ button:hover {
     white-space: pre-wrap;
     line-height: 1.7;
     font-family: 'Menlo', 'Courier New', monospace;
-    max-height: 50vh;
+    max-height: 60vh; /* UPDATED: Slightly taller scroll box */
     overflow-y: auto;
 }
 
@@ -202,36 +206,55 @@ button:hover {
     background-color: rgba(255, 255, 255, 0.1);
 }
 
-
-/* ==================================================================== */
-/* === NEW: MODERN SCROLLBAR STYLING === */
-/* This targets the scrollbar in textareas and the output content box */
-
-/* The main scrollbar element */
 textarea::-webkit-scrollbar,
 #output-content::-webkit-scrollbar {
-  width: 10px; /* Thinner scrollbar */
+  width: 10px;
 }
 
-/* The track (the background of the scrollbar) */
 textarea::-webkit-scrollbar-track,
 #output-content::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.2); /* A very subtle dark track */
+  background: rgba(0, 0, 0, 0.2);
   border-radius: 10px;
 }
 
-/* The thumb (the draggable part) */
 textarea::-webkit-scrollbar-thumb,
 #output-content::-webkit-scrollbar-thumb {
-  background-color: rgba(142, 68, 173, 0.5); /* Semi-transparent purple from the theme */
+  background-color: rgba(142, 68, 173, 0.5);
   border-radius: 10px;
   border: 2px solid transparent;
   background-clip: content-box;
 }
 
-/* Style the thumb on hover for better user feedback */
 textarea::-webkit-scrollbar-thumb:hover,
 #output-content::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(142, 68, 173, 0.8); /* Make the thumb more opaque on hover */
+  background-color: rgba(142, 68, 173, 0.8);
+}
+
+/* ==================================================================== */
+/* === NEW: Media Query for Responsive Design === */
+/* This will apply to screens smaller than 768px (like tablets and phones) */
+@media (max-width: 768px) {
+    body {
+        /* Align items to the top on small screens instead of centering vertically */
+        align-items: flex-start;
+        padding: 10px; /* Less padding on the body */
+    }
+
+    .container {
+        padding: 20px; /* Less padding inside the panel */
+        margin-top: 20px; /* Add some space from the top */
+    }
+
+    .header h1 {
+        font-size: 2.5em; /* Make the main title smaller */
+    }
+
+    .header p {
+        font-size: 1em; /* Smaller subtitle */
+    }
+
+    #output-content {
+        max-height: 70vh; /* Allow the output box to be taller on mobile */
+    }
 }
 /* ==================================================================== */
