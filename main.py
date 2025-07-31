@@ -8,8 +8,18 @@ from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 from whitenoise import WhiteNoise
 
-# --- Flask App Initialization (Final, Correct Version) ---
-app = Flask(__name__, template_folder='templates', static_folder='static')
+# --- Flask App Initialization (Final, Bulletproof Version) ---
+
+# Get the absolute path of the directory where this file lives.
+# Inside the Docker container, this will be '/app'.
+ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# Define the absolute paths to the templates and static folders.
+TEMPLATE_DIR = os.path.join(ROOT_DIR, 'templates')
+STATIC_DIR = os.path.join(ROOT_DIR, 'static')
+
+# Initialize Flask with these absolute paths.
+app = Flask(__name__, template_folder=TEMPLATE_DIR, static_folder=STATIC_DIR)
 CORS(app)
 app.wsgi_app = WhiteNoise(app.wsgi_app)
 
@@ -29,14 +39,14 @@ REASONING_MODE = "deepturbo"
 TEMPERATURE = 0.7
 MAX_TOKENS = 10000
 
-# --- NEW: Load "Donna" Dossier Prompt from external file ---
+# --- Load "Donna" Dossier Prompt from external file (Final, Bulletproof Version) ---
 try:
-    with open('Prompt.txt', 'r', encoding='utf-8') as file:
+    # Build the absolute path to the prompt file.
+    prompt_file_path = os.path.join(ROOT_DIR, 'Prompt.txt')
+    with open(prompt_file_path, 'r', encoding='utf-8') as file:
         DONNA_PROMPT_TEMPLATE = file.read()
 except FileNotFoundError:
-    print("FATAL ERROR: Prompt.txt not found. The application cannot start.")
-    # In a real app, you'd want to handle this more gracefully,
-    # but for now, we'll let it crash if the prompt is missing.
+    print(f"FATAL ERROR: Prompt.txt not found at path: {prompt_file_path}. The application cannot start.")
     raise
 
 # --- API Helper Functions (No Change) ---
